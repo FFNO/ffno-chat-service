@@ -1,8 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { WsException } from '@nestjs/websockets';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -14,25 +16,17 @@ export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    let client = context.switchToWs().getClient();
-    const cookie = client.handshake.headers.cookie;
-    console.log('🚀 ~ AuthGuard ~ cookie:', cookie);
+    try {
+      const client: Socket = context.switchToWs().getClient<Socket>();
+      const request = context.switchToHttp().getRequest<Request>();
 
-    return true;
+      const token = client.handshake.auth.token;
+      const payload = this.jwtService.verify(token);
+      request['staff'] = payload;
 
-    //     const token = request.cookies.token;
-
-    //     if (!token) {
-    //       return false;
-    //     }
-
-    //     try {
-    //       const payload = this.jwtService.verify(token);
-    //       request['staff'] = payload;
-    //     } catch (error) {
-    //       return false;
-    //     }
-    //     return true;
-    //   }
+      return Boolean(payload);
+    } catch (err) {
+      throw new WsException(err.message);
+    }
   }
 }

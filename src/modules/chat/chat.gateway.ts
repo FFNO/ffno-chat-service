@@ -5,11 +5,13 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { plainToInstance } from 'class-transformer';
 import { Server } from 'socket.io';
 import { PrismaService } from 'src/config';
 import { CHAT_PATTERNS, IMemberResDto } from 'src/libs';
 import { CurrentMember } from 'src/shared';
 import { AuthGuard } from '../auth/auth.guard';
+import { SendMessageDto } from './chat.dto';
 
 @WebSocketGateway({
   cors: {
@@ -25,30 +27,26 @@ export class ChatGateway {
   @SubscribeMessage(CHAT_PATTERNS.SEND_MESSAGE)
   async handleSendMessage(
     @MessageBody()
-    data: any,
+    data: string,
     @CurrentMember() member: IMemberResDto,
   ) {
-    const { content, senderId, receiverId } = JSON.parse(data);
-    console.log(
-      '🚀 ~ ChatGateway ~ content, senderId, receiverId:',
-      data,
-      content,
-      senderId,
-      receiverId,
-      member,
+    const { content, receiverId } = plainToInstance(
+      SendMessageDto,
+      JSON.parse(data),
     );
+    const senderId = member.id;
 
-    // const message = await this.prismaService.message.create({
-    //   data: {
-    //     content,
-    //     senderId,
-    //     receiverId,
-    //   },
-    // });
+    const message = await this.prismaService.message.create({
+      data: {
+        content,
+        senderId,
+        receiverId,
+      },
+    });
 
-    // this.server.sockets.emit(
-    //   CHAT_PATTERNS.RECEIVE_MESSAGE + [senderId, receiverId].sort().join(),
-    //   message,
-    // );
+    this.server.sockets.emit(
+      CHAT_PATTERNS.RECEIVE_MESSAGE + [senderId, receiverId].sort().join(),
+      message,
+    );
   }
 }

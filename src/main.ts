@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -6,6 +7,13 @@ async function bootstrap() {
 
   app.enableCors();
 
-  await app.listen(3020);
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.TCP,
+    options: { port: 3020 },
+  });
+
+  await app.startAllMicroservices();
+
+  await app.listen(3200);
 }
 bootstrap();
