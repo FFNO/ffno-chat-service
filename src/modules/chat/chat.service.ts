@@ -6,6 +6,23 @@ export class ChatService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getDirectMessages(memberId: string, channelId: string) {
+    const channel = await this.prismaService.channel.findUnique({
+      where: { id: channelId },
+    });
+
+    if (!channel && channelId.length === 73) {
+      await this.prismaService.channel.create({
+        data: {
+          id: channelId,
+          members: {
+            createMany: {
+              data: channelId.split('_').map((memberId) => ({ memberId })),
+            },
+          },
+        },
+      });
+    }
+
     const member = await this.prismaService.channelMember.findUnique({
       where: { memberId_channelId: { memberId, channelId } },
     });
@@ -26,6 +43,6 @@ export class ChatService {
       data: { seenAt: new Date() },
     });
 
-    return { messages };
+    return { channelId, messages };
   }
 }

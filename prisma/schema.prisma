@@ -14,17 +14,18 @@ datasource db {
 }
 
 model Message {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   content   String
   senderId  String
+  sender    ChannelMember @relation(fields: [senderId, channelId], references: [memberId, channelId])
   channelId String
-  channel   Channel  @relation(fields: [channelId], references: [id])
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  channel   Channel       @relation(fields: [channelId], references: [id])
+  updatedAt DateTime      @updatedAt
+  createdAt DateTime      @default(now())
 }
 
 model Channel {
-  id       String          @id @default(uuid())
+  id       String          @id
   members  ChannelMember[]
   messages Message[]
 }
@@ -34,6 +35,7 @@ model ChannelMember {
   memberId  String
   channelId String
   channel   Channel   @relation(fields: [channelId], references: [id])
+  messages  Message[]
 
   @@id([memberId, channelId])
 }
