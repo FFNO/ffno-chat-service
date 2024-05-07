@@ -7,5 +7,5 @@ export class SendMessageDto implements ISendMessageDto {
   content: string;
 
   @IsUUID()
-  receiverId: string;
+  channelId: string;
 }

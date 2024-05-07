@@ -30,7 +30,7 @@ export class ChatGateway {
     data: string,
     @CurrentMember() member: IMemberResDto,
   ) {
-    const { content, receiverId } = plainToInstance(
+    const { content, channelId } = plainToInstance(
       SendMessageDto,
       JSON.parse(data),
     );
@@ -40,12 +40,12 @@ export class ChatGateway {
       data: {
         content,
         senderId,
-        receiverId,
+        channelId,
       },
     });
 
     this.server.sockets.emit(
-      CHAT_PATTERNS.RECEIVE_MESSAGE + [senderId, receiverId].sort().join(),
+      CHAT_PATTERNS.RECEIVE_MESSAGE + channelId,
       message,
     );
   }
