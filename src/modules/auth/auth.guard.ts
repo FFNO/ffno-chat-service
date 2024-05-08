@@ -20,12 +20,13 @@ export class AuthGuard implements CanActivate {
       const client: Socket = context.switchToWs().getClient<Socket>();
       const request = context.switchToHttp().getRequest<Request>();
 
-      const token = client.handshake.auth.token;
+      const token = client.handshake.headers.cookie.substring(6);
       const payload = this.jwtService.verify(token);
       request['staff'] = payload;
 
       return Boolean(payload);
     } catch (err) {
+      console.log('🚀 ~ AuthGuard ~ err:', err);
       throw new WsException(err.message);
     }
   }
