@@ -1,19 +1,25 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/config';
+import { IGetListMessageDto } from 'src/libs';
 
 @Injectable()
 export class ChatService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getDirectMessages(memberId: string, channelId: string) {
+  async getChannelMessages(data: IGetListMessageDto) {
+    const { memberId, channelId, channelName, channelImgUrl } = data;
+
     const channel = await this.prismaService.channel.findUnique({
       where: { id: channelId },
     });
 
-    if (!channel && channelId.length === 73) {
+    if (!channel && channelName && channelId.length === 73) {
       await this.prismaService.channel.create({
         data: {
           id: channelId,
+          name: channelName,
+          imgUrl: channelImgUrl,
+          lastMessageId: null,
           members: {
             createMany: {
               data: channelId.split('_').map((memberId) => ({ memberId })),
@@ -44,5 +50,15 @@ export class ChatService {
     });
 
     return { channelId, messages };
+  }
+
+  async getListChannel(memberId: string) {
+    const channels = await this.prismaService.channel.findMany({
+      where: { lastMessageId: { not: null }, members: { some: { memberId } } },
+      include: { lastMessage: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    return { total: channels.length, data: channels };
   }
 }

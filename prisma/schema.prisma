@@ -14,20 +14,27 @@ datasource db {
 }
 
 model Message {
-  id        String        @id @default(uuid())
-  content   String
-  senderId  String
-  sender    ChannelMember @relation(fields: [senderId, channelId], references: [memberId, channelId])
-  channelId String
-  channel   Channel       @relation(fields: [channelId], references: [id])
-  updatedAt DateTime      @updatedAt
-  createdAt DateTime      @default(now())
+  id          String        @id @default(uuid())
+  content     String
+  senderId    String
+  sender      ChannelMember @relation(fields: [senderId, channelId], references: [memberId, channelId])
+  channelId   String
+  channel     Channel       @relation(name: "messages", fields: [channelId], references: [id])
+  lastMessage Channel?      @relation(name: "last_message")
+  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime      @default(now())
 }
 
 model Channel {
-  id       String          @id
-  members  ChannelMember[]
-  messages Message[]
+  id            String          @id
+  name          String
+  imgUrl        String
+  lastMessageId String?         @unique
+  lastMessage   Message?        @relation(name: "last_message", fields: [lastMessageId], references: [id])
+  messages      Message[]       @relation(name: "messages")
+  members       ChannelMember[]
+  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime        @default(now())
 }
 
 model ChannelMember {

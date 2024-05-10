@@ -7,14 +7,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { plainToInstance } from 'class-transformer';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'src/config';
 import { CHAT_PATTERNS, IMemberResDto } from 'src/libs';
 import { CurrentMember } from 'src/shared';
 import { AuthGuard } from '../auth/auth.guard';
 import { SendMessageDto } from './chat.dto';
-import { Socket } from 'socket.io';
 
 @WebSocketGateway(3001, {
   cors: { origin: 'http://localhost:5173', credentials: true },
@@ -48,6 +46,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         content,
         senderId,
         channelId,
+        lastMessage: { connect: { id: channelId } },
       },
     });
 

@@ -9,6 +9,11 @@ export class ChatController {
 
   @MessagePattern(CHAT_PATTERNS.GET_LIST_MESSAGES)
   async getDirectMessages(@Body() body: IGetListMessageDto) {
-    return this.chatService.getDirectMessages(body.memberId, body.channelId);
+    return this.chatService.getChannelMessages(body);
+  }
+
+  @MessagePattern(CHAT_PATTERNS.GET_LIST_CHANNEL)
+  async getListChannel(@Body() memberId: string) {
+    return this.chatService.getListChannel(memberId);
   }
 }
