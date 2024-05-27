@@ -9,7 +9,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.enableCors({
     credentials: true,
-    origin: ['http://localhost:5173'],
+    origin: process.env.CORS_WHITELIST.split(','),
   });
 
   app.connectMicroservice<MicroserviceOptions>({

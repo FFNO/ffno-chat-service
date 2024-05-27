@@ -38,11 +38,13 @@ model Channel {
 }
 
 model ChannelMember {
+  online    Boolean   @default(false)
   seenAt    DateTime?
   memberId  String
   channelId String
   channel   Channel   @relation(fields: [channelId], references: [id])
   messages  Message[]
+  updatedAt DateTime  @updatedAt
 
   @@id([memberId, channelId])
 }
