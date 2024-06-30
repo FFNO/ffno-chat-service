@@ -13,8 +13,11 @@ async function bootstrap() {
   });
 
   app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.TCP,
-    options: { port: 3020 },
+    transport: Transport.REDIS,
+    options: {
+      host: 'localhost',
+      port: 6379,
+    },
   });
 
   await app.startAllMicroservices();

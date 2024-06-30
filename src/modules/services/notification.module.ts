@@ -12,9 +12,10 @@ import { NotificationService } from './notification.service';
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create({
           options: {
-            port: configService.get('NOTIFICATION_SERVICE_PORT') ?? 3010,
+            host: 'localhost',
+            port: 6379,
           },
-          transport: Transport.TCP,
+          transport: Transport.REDIS,
         });
       },
       inject: [ConfigService],
